@@ -1,0 +1,7 @@
+This is a test csv input,,,,
+100,,,,
+20,,,,
+Add,,,,=A2 + A3
+Minus,,,,=A2 - A3
+Mul,,,,=A2 * A3
+Div,,,,=A2 / A3

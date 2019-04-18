@@ -1,67 +1,61 @@
-var xl = require('excel4node');
+const xl = require('excel4node');
+const fs = require('fs')
+const csv = require('csv-parse')
+const csv_string = require('csv-string')
 
-var wb = new xl.Workbook();
-var ws = wb.addWorksheet('Sheet 1');
- 
-var style = wb.createStyle({
-  font: {
-    color: '#FF0800',
-    size: 12,
-  },
-  numberFormat: '$#,##0.00; ($#,##0.00); -',
-});
- 
-var input = {
-    cells : [
-        {
-		    row : 1,
-		    col : 1,
-		    type : "string",
-		    value : "Hello Test",
-        },
-        {
-          row : 2,
-          col : 1,
-          type : "number",
-          value : 1,
-        },
-        {
-          row : 2,
-          col : 2,
-          type : "number",
-          value : 2,
-        },
-        {
-          row : 2,
-          col : 3,
-          type : "formula",
-          value : "A2+B2",
-        },
-    ],
-    styles : [
-        {
-            from : {row : 1, col: 1},
-            to : {row: 10, col : 10},
-            style : style
-        }
-    ]
+
+// =================== READ FILE =========================
+async function read_csv_file(file_path){
+  return new Promise( (resolve, reject) => {
+    let csv_file = []
+    fs.createReadStream(file_path)  
+    .pipe(csv())
+    .on('data', (row) => {
+      // console.log(row);
+      csv_file.push(row)
+    })
+    .on('end', () => {
+      console.log('CSV file successfully processed');
+      resolve(csv_file);
+    });
+    // reject("Error")
+  });
 }
-console.log(input)
 
-applyData = function applyData(worksheet, row, col, type ,value){
+async function read_csv_string(csv){
+  return csv_string.parse(csv);
+}
+// =======================================================
+
+
+ 
+function getStyle(){
+  let style = wb.createStyle({
+    font: {
+      color: '#FF0800',
+      size: 12,
+    },
+    numberFormat: '$#,##0.00; ($#,##0.00); -',
+  });
+  return style;
+}
+
+ 
+function applyData(worksheet, row, col, type ,value){
+  // console.log(type, value)
   type = type.toLowerCase()
   switch(type)
   {
       case "num":
       case "number":
-          worksheet.cell(row, col).number(value);
+          worksheet.cell(row, col).number(Number(value));
           break;
       case "str":
       case "string":
-          worksheet.cell(row, col).string(value);
+          worksheet.cell(row, col).string(String(value));
           break;
       case "formula":
-          worksheet.cell(row, col).formula(value);
+          worksheet.cell(row, col).formula((String(value)).substring(1));
           break;
       default:
           // callback("400 Invalid Operator");
@@ -70,59 +64,85 @@ applyData = function applyData(worksheet, row, col, type ,value){
   }
 }
 
-function applyCell(worksheet, cells){
-    console.log("applying cell ")
-    console.log(cells.length)
-    for(let i = 0 ; i <cells.length; i++){
-        console.log(cells[i])
-        applyData(worksheet, cells[i].row, cells[i].col, cells[i].type, cells[i].value);
-    }
+function getType(value){
+  if(value === '' || isNaN(value)){
+    if(value[0] === '=')
+      return "formula"
+    else
+      return "string" 
+  }
+  return "number"
 }
 
-function applyStyle(worksheet, styles){
-    console.log("applying styles")
-    console.log(styles.length)
-    for(let i = 0 ; i <styles.length; i++){
-        console.log(styles[i])
-        worksheet.cell(styles[i].from.row, styles[i].from.col, styles[i].to.row, styles[i].to.col).style(styles[i].style);
+function applyCellFromCSV(worksheet, cells){
+    console.log("applying cell ")
+    // console.log(cells.length)
+
+    for(let i = 0 ; i <cells.length; i++){
+        // console.log(cells[i])
+        for(let j = 0 ; j < cells[i].length; j++){
+          console.log('Applying cell ', i+1, j+1)
+          applyData(worksheet, i+1, j+1, getType(cells[i][j]), cells[i][j]);
+        }
+        
     }
+  }
+
+function applyStyle(worksheet, styles){
+  console.log("applying styles")
+  // console.log(styles.length)
+  for(let i = 0 ; i <styles.length; i++){
+      console.log(styles[i])
+      worksheet.cell(styles[i].from.row, styles[i].from.col, styles[i].to.row, styles[i].to.col).style(styles[i].style);
+  }
 }
-// Set value of cell A1 to 100 as a number type styled with paramaters of style
-// ws.cell(1, 1)
-//   .number(100)
-//   .style(style);
- 
-// // Set value of cell B1 to 200 as a number type styled with paramaters of style
-// ws.cell(1, 2)
-//   .number(200)
-//   .style(style);
- 
-// // Set value of cell C1 to a formula styled with paramaters of style
-// ws.cell(1, 3)
-//   .formula('SUM(A1:B1)')
-//   .style(style);
- 
-// // Set value of cell A2 to 'string' styled with paramaters of style
-// ws.cell(2, 1)
-//   .string('string')
-//   .style(style);
- 
-// // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
-// ws.cell(3, 1)
-//   .bool(true)
-//   .style(style)
-//   .style({font: {size: 14}});
- 
-applyCell(ws, input.cells);
-applyStyle(ws, input.styles);
-// wb.write('Excel.xlsx');
-wb.write('ExcelFile.xlsx', function(err, stats) {
+
+function applyMerge(worksheet, merge_input){
+  console.log(merge_input)
+  for(let i = 0; i<merge_input.length; i++){
+    let from  = xl.getExcelRowCol(merge_input[i].from);
+    let to = xl.getExcelRowCol(merge_input[i].to);
+    worksheet.cell(from.row, from.col, to.row, to.col, true);
+  }
+}
+function write_excel_file(wb, fileName){
+  wb.write(fileName, function(err, stats) {
     if (err) {
       console.error(err);
     } else {
-      console.log(stats); // Prints out an instance of a node.js fs.Stats object
+      // console.log(stats); // Prints out an instance of a node.js fs.Stats object
     }
   });
+}
+
+
+merge_input = [
+  {
+  from : "A1",
+  to : "E1"
+  }
+]
+
+async function main(){
+  let csv_file = await read_csv_file('./input/sheet.csv');
+  console.log(csv_file)
+
+  var wb = new xl.Workbook();
+  var ws = wb.addWorksheet('Sheet 1');
+
+  
+  applyCellFromCSV(ws, csv_file);
+  applyMerge(ws, merge_input);
+  // console.log(ws.cells)
+
+  console.log(ws)
+  write_excel_file(wb, "output_excel.xlsx")
+}
+
+
+main()
+ 
+
 
 
 

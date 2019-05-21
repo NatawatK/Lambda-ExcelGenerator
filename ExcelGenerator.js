@@ -22,7 +22,7 @@ async function read_csv_file(file_path){
   });
 }
 
-async function read_csv_string(csv){
+function read_csv_string(csv){
   return csv_string.parse(csv);
 }
 // =======================================================
@@ -30,6 +30,7 @@ async function read_csv_string(csv){
 
  
 function getStyle(){
+  var wb = new xl.Workbook();
   let style = wb.createStyle({
     font: {
       color: '#FF0800',
@@ -37,6 +38,7 @@ function getStyle(){
     },
     numberFormat: '$#,##0.00; ($#,##0.00); -',
   });
+  console.log(style)
   return style;
 }
 
@@ -105,6 +107,7 @@ function applyMerge(worksheet, merge_input){
     worksheet.cell(from.row, from.col, to.row, to.col, true);
   }
 }
+
 function write_excel_file(wb, fileName){
   wb.write(fileName, function(err, stats) {
     if (err) {
@@ -116,33 +119,33 @@ function write_excel_file(wb, fileName){
 }
 
 
-merge_input = [
+var merge_input = [
   {
   from : "A1",
   to : "E1"
   }
 ]
 
-async function main(){
-  let csv_file = await read_csv_file('./input/sheet.csv');
-  console.log(csv_file)
-
+async function generate(csv_data, merge_input, style_input){
+  console.log(csv_data)
+  
   var wb = new xl.Workbook();
   var ws = wb.addWorksheet('Sheet 1');
-
   
-  applyCellFromCSV(ws, csv_file);
+  applyCellFromCSV(ws, csv_data);
   applyMerge(ws, merge_input);
   // console.log(ws.cells)
-
-  console.log(ws)
+  // applyStyle(ws, style_input)
+  // console.log(ws)
   write_excel_file(wb, "output_excel.xlsx")
+  return wb;
 }
 
-
-main()
- 
-
-
-
-
+module.exports = { 
+  read_csv_file, 
+  read_csv_string, 
+  generate, 
+  merge_input, 
+  getStyle, 
+  write_excel_file
+}

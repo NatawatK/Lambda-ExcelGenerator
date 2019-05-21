@@ -20,23 +20,23 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-     - http:
-         path: /
-         method: get
-  calculator:
-    handler: handler.calc
-    events:
-     - http:
-         path: calc
-         method: get
+  # hello:
+  #   handler: handler.hello
+  #   events:
+  #    - http:
+  #        path: /
+  #        method: get
+  # calculator:
+  #   handler: handler.calc
+  #   events:
+  #    - http:
+  #        path: calc
+  #        method: get
   excel:
-    handler: testExcel4Node.excel
+    handler: excelHandler.excel
     events:
      - http:
-         path: calc
+         path: excel
          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

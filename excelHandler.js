@@ -11,7 +11,6 @@ const merge_input = [
 const csv_path = './input/sheet.csv'
 
 module.exports.excel = async (event, context, callback) => {
-  // let csv = await Excel.read_csv_file(csv_path)
   let csv = await Excel.read_csv_string(event.csv)
   let wb = await Excel.generate(csv, merge_input, Excel.getStyle)
   // wb.write("output.xlsx", res)

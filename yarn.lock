@@ -553,9 +553,9 @@ csv-generate@^3.2.0:
   integrity sha512-ZdS2KrgoLxm1guL9XhuaZX223Tiorldvl9QC0M/gihcrJavNDokAp/rX3CyyRHpK+rImxEE3L47cHe7npQMkkg==
 
 csv-parse@^4.3.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-4.4.0.tgz#b253e44119cdbd309287260447694cc17f10dc74"
-  integrity sha512-rvoRlZxu6Ap8jOkhoQQeI+5y/eTPqEIVk20bxZmo81k2ArUiNLv8LAERTEKarOQuC7BKXGyzSqAKWox115bg7A==
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-4.9.1.tgz#96e645520a1c95cbec1ffecb7513ebba61766269"
+  integrity sha512-DSoBx9V5PpAVWZbqqYKaoxYsf6yQdltTlUmZ1gPjvoTeRI5wPDlwa6ovrmeUP/1y4MjUkAPXx17aPlu0E6xBvg==
 
 csv-string@^3.1.5:
   version "3.1.5"
